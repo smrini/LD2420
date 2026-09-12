@@ -1,0 +1,36 @@
+name: PlatformIO CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+      - name: Run parser unit tests (native)
+        run: pio test -e native
+
+  build-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example:
+          - examples/BasicRead
+          - examples/RoomPresence
+          - examples/EventCallbacks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+      - name: Build example
+        run: pio ci --lib="." --board=esp32-s3-devkitc-1 "${{ matrix.example }}"
